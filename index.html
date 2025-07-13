@@ -371,7 +371,6 @@
             const description = document.getElementById('calendarDescription').value.trim();
             const updateFrequency = document.getElementById('updateFrequency').value;
             
-            // 입력값 검증
             if (!title || !url) {
                 showStatus('제목과 iCal URL을 모두 입력해주세요.', 'error');
                 return;
@@ -382,36 +381,36 @@
                 return;
             }
             
-            // 공유 링크 생성
-            const baseUrl = 'brmhnm.github.io/calendar-subscription/subscribe.html';
-            const params = new URLSearchParams({
-                title: title,
-                url: url,
-                desc: description || '캘린더를 구독하여 최신 일정을 받아보세요',
-                freq: updateFrequency
-            });
-            
-            currentShareLink = `${baseUrl}?${params.toString()}`;
-            
-            // 결과 표시
-            document.getElementById('shareLink').textContent = currentShareLink;
-            document.getElementById('resultSection').classList.add('active');
-            
-            showStatus('공유 링크가 성공적으로 생성되었습니다!', 'success');
-            
-            // 결과 섹션으로 스크롤
-            document.getElementById('resultSection').scrollIntoView({ 
-                behavior: 'smooth', 
-                block: 'start' 
-            });
-        }
-        
-        function isValidUrl(string) {
             try {
-                new URL(string);
-                return true;
-            } catch (_) {
-                return false;
+                // 파라미터 생성
+                const params = new URLSearchParams({
+                    title: title,
+                    url: url,
+                    desc: description || '캘린더를 구독하여 최신 일정을 받아보세요',
+                    freq: updateFrequency
+                });
+                
+                // 현재 URL 기준으로 subscribe.html 경로 생성
+                const currentUrl = new URL(window.location);
+                currentUrl.pathname = currentUrl.pathname.replace(/[^\/]*$/, '') + 'subscribe.html';
+                currentUrl.search = params.toString();
+                
+                currentShareLink = currentUrl.toString();
+                
+                // 결과 표시
+                document.getElementById('shareLink').value = currentShareLink;
+                document.getElementById('resultSection').classList.add('active');
+                
+                showStatus('공유 링크가 성공적으로 생성되었습니다!', 'success');
+                
+                document.getElementById('resultSection').scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                });
+                
+            } catch (error) {
+                console.error('링크 생성 중 오류:', error);
+                showStatus('링크 생성 중 오류가 발생했습니다: ' + error.message, 'error');
             }
         }
         
