@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>캘린더 구독하기</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+        
+        .calendar-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: white;
+            margin: 0 auto 30px;
+        }
+        
+        .title {
+            font-size: 2.5rem;
+            color: #333;
+            margin-bottom: 15px;
+            font-weight: 800;
+        }
+        
+        .description {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+        
+        .calendar-options {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 40px;
+        }
+        
+        .calendar-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px 25px;
+            border: 3px solid #e1e5e9;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+            min-width: 200px;
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        .calendar-option:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+        }
+        
+        .calendar-option.google {
+            border-color: #4285f4;
+            background: linear-gradient(135deg, #4285f4 0%, #34a853 100%);
+            color: white;
+        }
+        
+        .calendar-option.google:hover {
+            box-shadow: 0 15px 40px rgba(66, 133, 244, 0.3);
+        }
+        
+        .calendar-option.naver {
+            border-color: #03c75a;
+            background: linear-gradient(135deg, #03c75a 0%, #02b850 100%);
+            color: white;
+        }
+        
+        .calendar-option.naver:hover {
+            box-shadow: 0 15px 40px rgba(3, 199, 90, 0.3);
+        }
+        
+        .option-icon {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 15px;
+            font-size: 30px;
+            margin-bottom: 15px;
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .option-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .option-subtitle {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .manual-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 30px;
+            text-align: left;
+        }
+        
+        .manual-title {
+            font-size: 1.4rem;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 700;
+        }
+        
+        .ical-url {
+            background: white;
+            border: 2px dashed #dee2e6;
+            border-radius: 10px;
+            padding: 15px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 14px;
+            word-break: break-all;
+            margin: 20px 0;
+            color: #495057;
+        }
+        
+        .copy-url-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px 0;
+        }
+        
+        .copy-url-btn:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+        
+        .instructions {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #666;
+        }
+        
+        .instructions h4 {
+            color: #333;
+            margin: 15px 0 10px;
+        }
+        
+        .instructions ol {
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 5px;
+        }
+        
+        .status-message {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+            font-weight: 600;
+            display: none;
+        }
+        
+        .status-message.success {
+            background: #d4edda;
+            border: 2px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .status-message.info {
+            background: #d1ecf1;
+            border: 2px solid #bee5eb;
+            color: #0c5460;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .loading.active {
+            display: block;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 20px;
+                margin: 10px;
+            }
+            
+            .title {
+                font-size: 2rem;
+            }
+            
+            .calendar-options {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .calendar-option {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="calendar-icon">📅</div>
+        
+        <h1 class="title" id="calendarTitle">캘린더 구독하기</h1>
+        <p class="description" id="calendarDescription">아래 버튼을 클릭하여 캘린더를 구독하세요</p>
+        
+        <div class="calendar-options">
+            <a href="#" class="calendar-option google" onclick="subscribeToGoogle()">
+                <div class="option-icon">📅</div>
+                <div class="option-title">구글 캘린더</div>
+                <div class="option-subtitle">Google Calendar</div>
+            </a>
+            
+            <a href="#" class="calendar-option naver" onclick="subscribeToNaver()">
+                <div class="option-icon">📋</div>
+                <div class="option-title">네이버 캘린더</div>
+                <div class="option-subtitle">Naver Calendar</div>
+            </a>
+        </div>
+        
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>캘린더를 열고 있습니다...</p>
+        </div>
+        
+        <div id="statusMessage" class="status-message"></div>
+        
+        <div class="manual-section">
+            <h3 class="manual-title">📱 수동으로 추가하기</h3>
+            
+            <p>위 버튼이 작동하지 않는 경우, 아래 URL을 복사하여 수동으로 캘린더에 추가하세요:</p>
+            
+            <div class="ical-url" id="icalUrl"></div>
+            
+            <button class="copy-url-btn" onclick="copyIcalUrl()">📋 URL 복사하기</button>
+            
+            <div class="instructions">
+                <h4>🔸 구글 캘린더 수동 추가:</h4>
+                <ol>
+                    <li>구글 캘린더(calendar.google.com) 접속</li>
+                    <li>왼쪽 메뉴에서 "다른 캘린더" 옆 "+" 버튼 클릭</li>
+                    <li>"URL로 추가" 선택</li>
+                    <li>위 URL 붙여넣기 후 "캘린더 추가" 클릭</li>
+                </ol>
+                
+                <h4>🔸 네이버 캘린더 수동 추가:</h4>
+                <ol>
+                    <li>네이버 캘린더(calendar.naver.com) 접속</li>
+                    <li>"캘린더 관리" → "캘린더 추가" 클릭</li>
+                    <li>"외부 캘린더 가져오기" 선택</li>
+                    <li>위 URL 입력 후 "추가" 클릭</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let calendarData = {};
+        
+        // URL 파라미터에서 캘린더 정보 읽기
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            calendarData = {
+                title: urlParams.get('title') || '캘린더 구독하기',
+                url: urlParams.get('url') || '',
+                description: urlParams.get('desc') || '아래 버튼을 클릭하여 캘린더를 구독하세요',
+                frequency: urlParams.get('freq') || 'daily'
+            };
+            
+            // 페이지 내용 업데이트
+            if (calendarData.title) {
+                document.getElementById('calendarTitle').textContent = calendarData.title;
+                document.title = `${calendarData.title} - 캘린더 구독`;
+            }
+            
+            if (calendarData.description) {
+                document.getElementById('calendarDescription').textContent = calendarData.description;
+            }
+            
+            if (calendarData.url) {
+                document.getElementById('icalUrl').textContent = calendarData.url;
+            } else {
+                showStatus('캘린더 URL이 없습니다. 올바른 링크인지 확인해주세요.', 'error');
+            }
+        });
+        
+        function subscribeToGoogle() {
+            if (!calendarData.url) {
+                showStatus('캘린더 URL이 없습니다.', 'error');
+                return;
+            }
+            
+            showLoading(true);
+            
+            // 구글 캘린더 구독 URL 생성
+            const googleUrl = `https://calendar.google.com/calendar/render?cid=${encodeURIComponent(calendarData.url)}`;
+            
+            // 새 창에서 구글 캘린더 열기
+            const newWindow = window.open(googleUrl, '_blank');
+            
+            if (newWindow) {
+                showStatus('구글 캘린더가 새 창에서 열렸습니다. 구독을 완료해주세요!', 'success');
+            } else {
+                showStatus('팝업이 차단되었습니다. 팝업을 허용하고 다시 시도해주세요.', 'error');
+            }
+            
+            showLoading(false);
+        }
+        
+        function subscribeToNaver() {
+            if (!calendarData.url) {
+                showStatus('캘린더 URL이 없습니다.', 'error');
+                return;
+            }
+            
+            // 네이버 캘린더는 직접 구독 링크가 없으므로 URL 복사
+            copyIcalUrl();
+            showStatus('캘린더 URL이 복사되었습니다! 네이버 캘린더에서 "외부 캘린더 가져오기"를 사용하여 추가하세요.', 'info');
+        }
+        
+        function copyIcalUrl() {
+            if (!calendarData.url) {
+                showStatus('복사할 URL이 없습니다.', 'error');
+                return;
+            }
+            
+            navigator.clipboard.writeText(calendarData.url).then(() => {
+                showStatus('캘린더 URL이 클립보드에 복사되었습니다!', 'success');
+                
+                // 버튼 텍스트 임시 변경
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = '✅ 복사 완료!';
+                btn.style.background = '#28a745';
+                
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '';
+                }, 2000);
+            }).catch(() => {
+                showStatus('복사에 실패했습니다. 수동으로 복사해주세요.', 'error');
+            });
+        }
+        
+        function showStatus(message, type) {
+            const statusEl = document.getElementById('statusMessage');
+            statusEl.textContent = message;
+            statusEl.className = `status-message ${type}`;
+            statusEl.style.display = 'block';
+            
+            setTimeout(() => {
+                statusEl.style.display = 'none';
+            }, 5000);
+        }
+        
+        function showLoading(show) {
+            const loadingEl = document.getElementById('loading');
+            if (show) {
+                loadingEl.classList.add('active');
+            } else {
+                setTimeout(() => {
+                    loadingEl.classList.remove('active');
+                }, 1000);
+            }
+        }
+        
+        // 페이지 로드 시 캘린더 URL 유효성 검사
+        window.addEventListener('load', function() {
+            if (calendarData.url && !isValidUrl(calendarData.url)) {
+                showStatus('유효하지 않은 캘린더 URL입니다.', 'error');
+            }
+        });
+        
+        function isValidUrl(string) {
+            try {
+                new URL(string);
+                return true;
+            } catch (_) {
+                return false;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>캘린더 설정</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 40px;
+            gap: 15px;
+        }
+        
+        .settings-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            color: #333;
+            font-weight: 700;
+        }
+        
+        .form-group {
+            margin-bottom: 30px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 12px;
+            font-weight: 600;
+            color: #555;
+            font-size: 16px;
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            background: #fafbfc;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+        }
+        
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: #9ca3af;
+            font-style: italic;
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+            line-height: 1.5;
+        }
+        
+        .select-wrapper {
+            position: relative;
+        }
+        
+        .select-wrapper::after {
+            content: '▼';
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            pointer-events: none;
+            font-size: 12px;
+        }
+        
+        .form-group select {
+            appearance: none;
+            background-image: none;
+            cursor: pointer;
+            padding-right: 50px;
+        }
+        
+        .generate-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 18px 30px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .generate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+        }
+        
+        .generate-btn:active {
+            transform: translateY(-1px);
+        }
+        
+        .result-section {
+            margin-top: 40px;
+            padding: 30px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 15px;
+            border: 2px dashed #dee2e6;
+            display: none;
+        }
+        
+        .result-section.active {
+            display: block;
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .result-title {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 700;
+        }
+        
+        .share-link {
+            background: white;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            word-break: break-all;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 14px;
+            line-height: 1.4;
+            color: #495057;
+        }
+        
+        .copy-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+        
+        .copy-btn:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+        }
+        
+        .test-btn {
+            background: #17a2b8;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .test-btn:hover {
+            background: #138496;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(23, 162, 184, 0.3);
+        }
+        
+        .status-message {
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: center;
+            font-weight: 600;
+            display: none;
+        }
+        
+        .status-message.success {
+            background: #d4edda;
+            border: 2px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .status-message.error {
+            background: #f8d7da;
+            border: 2px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .instructions {
+            margin-top: 20px;
+            padding: 20px;
+            background: #fff3cd;
+            border: 2px solid #ffeaa7;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #856404;
+        }
+        
+        .instructions h4 {
+            margin-bottom: 10px;
+            color: #856404;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 20px;
+                margin: 10px;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .form-group input,
+            .form-group textarea,
+            .form-group select {
+                padding: 14px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="settings-icon">⚙️</div>
+            <h1>캘린더 설정</h1>
+        </div>
+        
+        <form id="calendarForm">
+            <div class="form-group">
+                <label for="calendarTitle">캘린더 제목</label>
+                <input type="text" id="calendarTitle" placeholder="예: 회사 일정, 수업 시간표" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="calendarUrl">iCal/ICS URL</label>
+                <input type="url" id="calendarUrl" placeholder="https://example.com/calendar.ics" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="calendarDescription">설명 (선택사항)</label>
+                <textarea id="calendarDescription" placeholder="캘린더에 대한 간단한 설명을 입력하세요"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="updateFrequency">업데이트 주기</label>
+                <div class="select-wrapper">
+                    <select id="updateFrequency">
+                        <option value="hourly">매일</option>
+                        <option value="daily">매일</option>
+                        <option value="weekly">매주</option>
+                        <option value="monthly">매월</option>
+                    </select>
+                </div>
+            </div>
+            
+            <button type="submit" class="generate-btn">
+                🚀 구독 위젯 생성
+            </button>
+        </form>
+        
+        <div id="statusMessage" class="status-message"></div>
+        
+        <div id="resultSection" class="result-section">
+            <h3 class="result-title">🎉 공유 링크 생성 완료!</h3>
+            
+            <div id="shareLink" class="share-link"></div>
+            
+            <button type="button" class="copy-btn" onclick="copyShareLink()">
+                📋 링크 복사하기
+            </button>
+            
+            <button type="button" class="test-btn" onclick="testShareLink()">
+                🔗 링크 테스트하기
+            </button>
+            
+            <div class="instructions">
+                <h4>📢 공유 방법:</h4>
+                <p>1. 위 링크를 복사하여 이메일, 메신저, 웹사이트 등에 공유하세요</p>
+                <p>2. 사용자가 링크를 클릭하면 구글/네이버 캘린더 구독 페이지가 열립니다</p>
+                <p>3. 사용자는 원하는 캘린더를 선택하여 구독할 수 있습니다</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentShareLink = '';
+        
+        // 폼 제출 처리
+        document.getElementById('calendarForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            generateShareLink();
+        });
+        
+        function generateShareLink() {
+            const title = document.getElementById('calendarTitle').value.trim();
+            const url = document.getElementById('calendarUrl').value.trim();
+            const description = document.getElementById('calendarDescription').value.trim();
+            const updateFrequency = document.getElementById('updateFrequency').value;
+            
+            // 입력값 검증
+            if (!title || !url) {
+                showStatus('제목과 iCal URL을 모두 입력해주세요.', 'error');
+                return;
+            }
+            
+            if (!isValidUrl(url)) {
+                showStatus('올바른 URL 형식을 입력해주세요.', 'error');
+                return;
+            }
+            
+            // 공유 링크 생성
+            const baseUrl = 'https://your-site.com/subscribe.html'; // 실제 배포 시 변경
+            const params = new URLSearchParams({
+                title: title,
+                url: url,
+                desc: description || '캘린더를 구독하여 최신 일정을 받아보세요',
+                freq: updateFrequency
+            });
+            
+            currentShareLink = `${baseUrl}?${params.toString()}`;
+            
+            // 결과 표시
+            document.getElementById('shareLink').textContent = currentShareLink;
+            document.getElementById('resultSection').classList.add('active');
+            
+            showStatus('공유 링크가 성공적으로 생성되었습니다!', 'success');
+            
+            // 결과 섹션으로 스크롤
+            document.getElementById('resultSection').scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'start' 
+            });
+        }
+        
+        function isValidUrl(string) {
+            try {
+                new URL(string);
+                return true;
+            } catch (_) {
+                return false;
+            }
+        }
+        
+        function copyShareLink() {
+            if (!currentShareLink) {
+                showStatus('먼저 공유 링크를 생성해주세요.', 'error');
+                return;
+            }
+            
+            navigator.clipboard.writeText(currentShareLink).then(() => {
+                showStatus('공유 링크가 클립보드에 복사되었습니다!', 'success');
+                
+                // 버튼 텍스트 임시 변경
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = '✅ 복사 완료!';
+                btn.style.background = '#28a745';
+                
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '';
+                }, 2000);
+            }).catch(() => {
+                showStatus('복사에 실패했습니다. 수동으로 복사해주세요.', 'error');
+            });
+        }
+        
+        function testShareLink() {
+            if (!currentShareLink) {
+                showStatus('먼저 공유 링크를 생성해주세요.', 'error');
+                return;
+            }
+            
+            // 새 창에서 링크 열기
+            window.open(currentShareLink, '_blank');
+            showStatus('새 창에서 공유 링크를 열었습니다.', 'success');
+        }
+        
+        function showStatus(message, type) {
+            const statusEl = document.getElementById('statusMessage');
+            statusEl.textContent = message;
+            statusEl.className = `status-message ${type}`;
+            statusEl.style.display = 'block';
+            
+            setTimeout(() => {
+                statusEl.style.display = 'none';
+            }, 5000);
+        }
+        
+        // 개발 환경에서 테스트 데이터 자동 입력
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            window.addEventListener('load', () => {
+                // 테스트 데이터 버튼 추가
+                const testDataBtn = document.createElement('button');
+                testDataBtn.textContent = '🧪 테스트 데이터 입력';
+                testDataBtn.type = 'button';
+                testDataBtn.className = 'test-btn';
+                testDataBtn.style.marginTop = '10px';
+                testDataBtn.onclick = function() {
+                    document.getElementById('calendarTitle').value = '회사 일정';
+                    document.getElementById('calendarUrl').value = 'https://calendar.google.com/calendar/ical/example.ics';
+                    document.getElementById('calendarDescription').value = '회사의 주요 일정을 확인하세요';
+                    showStatus('테스트 데이터가 입력되었습니다.', 'success');
+                };
+                
+                document.getElementById('calendarForm').appendChild(testDataBtn);
+            });
+        }
+    </script>
+</body>
+</html>
