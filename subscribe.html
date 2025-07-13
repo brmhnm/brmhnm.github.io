@@ -479,7 +479,17 @@
             // 네이버 캘린더 바로 열기 + 안내
             setTimeout(() => {
                 window.open('https://calendar.naver.com/', '_blank');
-                showStatus(`📋 URL이 복사되었습니다!<br><br><strong>네이버 캘린더 추가 방법:</strong><br>1. 새로 열린 네이버 캘린더에서<br>2. "캘린더 관리" → "캘린더 추가" 클릭<br>3. "외부 캘린더 가져오기" 선택<br>4. 복사된 URL 붙여넣기`, 'info');
+                showStatus(`📋 URL이 복사되었습니다!<br><br><⚠️ <strong>네이버 캘린더는 자동 추가가 지원되지 않습니다</strong><br>
+            아래 단계를 따라 수동으로 추가해주세요:<br><br>
+            
+            <strong>📝 네이버 캘린더 수동 추가 방법:</strong><br>
+            1. 새로 열린 네이버 캘린더에 로그인<br>
+            2. 좌측 "캘린더 관리" 클릭<br>
+            3. "캘린더 추가" → "외부 캘린더 가져오기" 선택<br>
+            4. 복사된 URL 붙여넣기 후 "추가" 클릭<br><br>
+            
+            💡 <strong>자동 구독을 원하시면 구글 캘린더를 이용해주세요!</strong>
+        `, 'info');
             }, 500);
         }
         
