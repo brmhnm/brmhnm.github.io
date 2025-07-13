@@ -421,7 +421,14 @@
                 return;
             }
             
-            navigator.clipboard.writeText(currentShareLink).then(() => {
+            const textArea = document.createElement('textarea');
+            textArea.value = currentShareLink;
+            document.body.appendChild(textArea);
+            textArea.select();
+            textArea.setSelectionRange(0, 99999); // 모바일 지원
+            
+            try {
+                document.execCommand('copy');
                 showStatus('공유 링크가 클립보드에 복사되었습니다!', 'success');
                 
                 // 버튼 텍스트 임시 변경
@@ -434,10 +441,12 @@
                     btn.textContent = originalText;
                     btn.style.background = '';
                 }, 2000);
-            }).catch(() => {
+            } catch (err) {
                 showStatus('복사에 실패했습니다. 수동으로 복사해주세요.', 'error');
-            });
-        }
+            }
+            
+            document.body.removeChild(textArea);
+        }       
         
         function testShareLink() {
             if (!currentShareLink) {
